@@ -1,12 +1,13 @@
-
-import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 // Estados posibles de un restaurante
 export const ESTADOS = {
     POR_IR: 'por_ir',
     VISITADO: 'visitado',
     RECOMENDADO: 'recomendado',
-};
+} as const;
+
+export type Estado = typeof ESTADOS[keyof typeof ESTADOS];
 
 // Categorías de cocina
 export const CATEGORIAS = [
@@ -21,9 +22,30 @@ export const CATEGORIAS = [
     'Mariscos',
     'Vegetariana',
     'Otra',
-];
+] as const;
 
-export function crearRestaurante(datos = []) {
+export type Categoria = typeof CATEGORIAS[number];
+
+export interface Ubicacion {
+    latitude: number;
+    longitude: number;
+}
+
+export interface Restaurante {
+    id: string;
+    nombre: string;
+    direccion: string;
+    categoria: Categoria | '';
+    calificacion: number;
+    notas: string;
+    fotos: string[];
+    estado: Estado;
+    ubicacion: Ubicacion | null;
+    fechaCreacion: string;
+    fechaActualizacion: string;
+}
+
+export function crearRestaurante(datos: Partial<Restaurante> = {}): Restaurante {
     return {
         id: uuidv4(),
         nombre: '',
