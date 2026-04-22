@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Restaurante } from '../models/restaurante';
 import {
     actualizarRestaurante,
     eliminarRestaurante,
@@ -7,7 +8,7 @@ import {
 } from '../storage/restauranteStorage';
 
 export function useRestaurantes() {
-    const [restaurantes, setRestaurantes] = useState([]);
+    const [restaurantes, setRestaurantes] = useState<Restaurante[]>([]);
     const [cargando, setCargando] = useState(true);
 
     const cargar = useCallback(async () => {
@@ -19,21 +20,23 @@ export function useRestaurantes() {
 
     useEffect(() => {
         cargar();
-    }, []);
+    }, [cargar]);
 
-    const agregar = useCallback(async (datos) => {
+    const agregar = useCallback(async (datos: Partial<Restaurante>) => {
         const nuevo = await guardarRestaurante(datos);
         setRestaurantes(prev => [...prev, nuevo]);
         return nuevo;
     }, []);
 
-    const actualizar = useCallback(async (id, cambios) => {
+    const actualizar = useCallback(async (id: string, cambios: Partial<Restaurante>) => {
         const actualizado = await actualizarRestaurante(id, cambios);
-        setRestaurantes(prev => prev.map(r => r.id === id ? actualizado : r));
+        if (actualizado) {
+            setRestaurantes(prev => prev.map(r => r.id === id ? actualizado : r));
+        }
         return actualizado;
     }, []);
 
-    const eliminar = useCallback(async (id) => {
+    const eliminar = useCallback(async (id: string) => {
         await eliminarRestaurante(id);
         setRestaurantes(prev => prev.filter(r => r.id !== id));
     }, []);

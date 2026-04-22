@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { crearRestaurante } from '../models/restaurante';
+import { crearRestaurante, Restaurante } from '../models/restaurante';
 
 const STORAGE_KEY = '@restaurantes';
 
 // Obtener todos los restaurantes
-export async function obtenerRestaurantes() {
+export async function obtenerRestaurantes(): Promise<Restaurante[]> {
     try {
         const json = await AsyncStorage.getItem(STORAGE_KEY);
         return json ? JSON.parse(json) : [];
@@ -15,12 +15,12 @@ export async function obtenerRestaurantes() {
 }
 
 // Guardar un restaurante nuevo
-export async function guardarRestaurante(datos) {
+export async function guardarRestaurante(datos: Partial<Restaurante>): Promise<Restaurante> {
     try {
         const restaurantes = await obtenerRestaurantes();
         const nuevo = crearRestaurante(datos);
         const actualizados = [...restaurantes, nuevo];
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(actualizados));
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([...restaurantes, nuevo]));
         return nuevo;
     } catch (error) {
         console.error('Error al guardar restaurante:', error);
@@ -29,7 +29,7 @@ export async function guardarRestaurante(datos) {
 }
 
 // Actualizar un restaurante existente
-export async function actualizarRestaurante(id, cambios) {
+export async function actualizarRestaurante(id: string, cambios: Partial<Restaurante>): Promise<Restaurante | null> {
     try {
         const restaurantes = await obtenerRestaurantes();
         const actualizados = restaurantes.map(r =>
@@ -38,7 +38,7 @@ export async function actualizarRestaurante(id, cambios) {
                 : r
         );
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(actualizados));
-        return actualizados.find(r => r.id === id);
+        return actualizados.find(r => r.id === id) ?? null;
     } catch (error) {
         console.error('Error al actualizar restaurante:', error);
         throw error;
@@ -46,7 +46,7 @@ export async function actualizarRestaurante(id, cambios) {
 }
 
 // Eliminar un restaurante
-export async function eliminarRestaurante(id) {
+export async function eliminarRestaurante(id: string): Promise<void> {
     try {
         const restaurantes = await obtenerRestaurantes();
         const actualizados = restaurantes.filter(r => r.id !== id);
@@ -58,10 +58,10 @@ export async function eliminarRestaurante(id) {
 }
 
 // Obtener un restaurante por ID
-export async function obtenerRestaurantePorId(id) {
+export async function obtenerRestaurantePorId(id: string): Promise<Restaurante | null> {
     try {
         const restaurantes = await obtenerRestaurantes();
-        return restaurantes.find(r => r.id === id) || null;
+        return restaurantes.find(r => r.id === id) ?? null;
     } catch (error) {
         console.error('Error al obtener restaurante:', error);
         return null;
